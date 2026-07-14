@@ -6,6 +6,8 @@ from typing import Iterator
 
 from trip_ingest.model import RawRow, Trip
 
+import json
+
 
 def read_drop(path: Path) -> Iterator[RawRow]:
     """Yield one raw JSON object per line of a `.jsonl` drop.
@@ -13,9 +15,52 @@ def read_drop(path: Path) -> Iterator[RawRow]:
     Task 2. A drop is a night's trips: it does not fit in memory, and on a bad night it does not fit
     on the machine. Nothing that reads it may hold more than one line at a time.
     """
-    raise NotImplementedError
+    
+    with path.open("r", encoding="utf-8") as f:
+        for line in f:  
+            if line.strip() == "":
+                continue
+            else:                   
+                yield json.loads(line)
+        # raise NotImplementedError
 
 
 def parse_row(raw: RawRow) -> Trip:
     """Turn one raw JSON object into a `Trip`, or raise. Task 3."""
     raise NotImplementedError
+
+
+
+
+# csv_out = Path("/tmp/borough_counts.csv")
+# jsonl_path = Path("/data/trips_sample.jsonl")
+
+
+# def convert(jsonl_path, csv_out):
+#     n = 0
+#     n_out = 0
+#     # Open the input file for reading AND the output file for writing
+#     with (
+#         jsonl_path.open("r", encoding="utf-8") as f_in,
+#         csv_out.open("w", encoding="utf-8", newline="") as f_out,
+#     ):
+
+#         writer = csv.writer(f_out)
+#         writer.writerow(["pu_location_id", "total_amount"])  # Write CSV Header
+
+#         for line in f_in:  # Read line by line
+#             rec = json.loads(line)
+#             n += 1
+
+#             # Extract actual values from the JSON object (using .get() safely handles missing keys)
+#             pu_location_id = rec.get("pu_location_id")
+#             total_amount = rec.get("total_amount")
+
+#             writer.writerow([pu_location_id, total_amount])
+#             n_out+=1
+
+#     print(f"{n:,} records readed")
+#     print(f"{n_out:,} records written")
+#     ##print(csv_out.read_text(encoding="utf-8"))
+
+# convert(jsonl_path, csv_out)   
