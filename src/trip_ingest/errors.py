@@ -11,6 +11,24 @@ from __future__ import annotations
 
 class IngestError(Exception):
     """Anything this ingest raises on purpose."""
+        
+class RowError(IngestError):
+    """This row is bad, skip it and keep going."""
 
+class JobError(IngestError):
+    """The job cannot run at all."""
 
+class MissingField(RowError):
+     print('A required field is missing')
+
+class BadTimestamp(RowError):
+    print('The timestamp is bad.')
+
+class NegativeDistance(RowError):
+    """The distance is negative."""
+
+class SlotUnavailable(JobError):
+    """Anything this ingest raises on purpose."""
+
+    
 # TODO Task 3.

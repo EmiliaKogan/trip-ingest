@@ -7,6 +7,8 @@ from typing import Iterator
 from trip_ingest.model import RawRow, Trip
 
 import json
+from trip_ingest.errors import MissingField ,NegativeDistance, BadTimestamp
+from datetime import datetime
 
 
 def read_drop(path: Path) -> Iterator[RawRow]:
@@ -24,12 +26,50 @@ def read_drop(path: Path) -> Iterator[RawRow]:
                 yield json.loads(line)
         # raise NotImplementedError
 
-
+bad_rows = []
 def parse_row(raw: RawRow) -> Trip:
     """Turn one raw JSON object into a `Trip`, or raise. Task 3."""
-    raise NotImplementedError
 
+    # if raw.get("trip_id") is None or raw.get("station_id") is None or raw.get("distance_m") is None or raw.get("started_at") is None:
+    #     bad_rows.append(raw)
+    #     raise MissingField
+    
+    # if datetime.fromisoformat(raw["started_at"]) is None or raw.get("started_at") is None:
+    #     bad_rows.append(raw)
+    #     raise BadTimestamp
+    
+    # if raw["distance_m"] < 0:
+    #     bad_rows.append(raw)
+    #     raise NegativeDistance
 
+    # return Trip(
+    #         trip_id=raw["trip_id"],
+    #         station_id=raw["station_id"],
+    #         started_at=datetime.fromisoformat(raw["started_at"]),
+    #         distance_m=int(raw["distance_m"])
+    #         )
+
+    if raw.get("trip_id") is None or raw.get("station_id") is None or raw.get("distance_m") is None:
+        bad_rows.append(raw)
+        raise MissingField
+    
+    if raw["distance_m"] < 0:
+        bad_rows.append(raw)
+        raise NegativeDistance
+    
+    try:
+        return Trip(
+            trip_id=raw["trip_id"],
+            station_id=raw["station_id"],
+            started_at=datetime.fromisoformat(raw["started_at"]),
+            distance_m=int(raw["distance_m"])
+        )
+    
+    except (ValueError, KeyError):
+        bad_rows.append(raw)
+        raise BadTimestamp
+
+    
 
 
 # csv_out = Path("/tmp/borough_counts.csv")
