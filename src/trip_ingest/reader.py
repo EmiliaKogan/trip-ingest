@@ -24,11 +24,38 @@ def read_drop(path: Path) -> Iterator[RawRow]:
                 continue
             else:                   
                 yield json.loads(line)
-        # raise NotImplementedError
+    #  if line.strip():                  
+    #       yield json.loads(line)   #more compact way to write the above code
+
+
 
 bad_rows = []
 def parse_row(raw: RawRow) -> Trip:
     """Turn one raw JSON object into a `Trip`, or raise. Task 3."""
+
+    if raw.get("trip_id") is None or raw.get("station_id") is None or raw.get("distance_m") is None:
+        bad_rows.append(raw)
+        raise MissingField
+    
+    if raw["distance_m"] < 0:
+        bad_rows.append(raw)
+        raise NegativeDistance
+    
+    try:
+        return Trip(
+            trip_id=raw["trip_id"],
+            station_id=raw["station_id"],
+            started_at=datetime.fromisoformat(raw["started_at"]),
+            distance_m=int(raw["distance_m"])
+        )
+        #return Trip.model_validate(raw) 
+        ##more compact way to write the above code, pydantic will handle the validation and raise errors if any field is missing or has an invalid value.
+    
+    except (ValueError, KeyError):
+        bad_rows.append(raw)
+        raise BadTimestamp
+
+    
 
     # if raw.get("trip_id") is None or raw.get("station_id") is None or raw.get("distance_m") is None or raw.get("started_at") is None:
     #     bad_rows.append(raw)
@@ -48,28 +75,6 @@ def parse_row(raw: RawRow) -> Trip:
     #         started_at=datetime.fromisoformat(raw["started_at"]),
     #         distance_m=int(raw["distance_m"])
     #         )
-
-    if raw.get("trip_id") is None or raw.get("station_id") is None or raw.get("distance_m") is None:
-        bad_rows.append(raw)
-        raise MissingField
-    
-    if raw["distance_m"] < 0:
-        bad_rows.append(raw)
-        raise NegativeDistance
-    
-    try:
-        return Trip(
-            trip_id=raw["trip_id"],
-            station_id=raw["station_id"],
-            started_at=datetime.fromisoformat(raw["started_at"]),
-            distance_m=int(raw["distance_m"])
-        )
-    
-    except (ValueError, KeyError):
-        bad_rows.append(raw)
-        raise BadTimestamp
-
-    
 
 
 # csv_out = Path("/tmp/borough_counts.csv")

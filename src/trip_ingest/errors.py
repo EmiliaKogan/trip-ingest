@@ -13,22 +13,28 @@ class IngestError(Exception):
     """Anything this ingest raises on purpose."""
         
 class RowError(IngestError):
+    pass
     """This row is bad, skip it and keep going."""
 
 class JobError(IngestError):
+    pass
     """The job cannot run at all."""
 
 class MissingField(RowError):
-     print('A required field is missing')
+    pass
+    """A required field is missing"""
 
 class BadTimestamp(RowError):
-    print('The timestamp is bad.')
+    pass
+    """The timestamp is bad."""
 
 class NegativeDistance(RowError):
+    pass
     """The distance is negative."""
 
 class SlotUnavailable(JobError):
-    """Anything this ingest raises on purpose."""
+    pass
+    """The database is not accepting new connections."""
 
     
 # TODO Task 3.
