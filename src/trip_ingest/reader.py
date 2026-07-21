@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Iterator
+from typing import Generator, Iterator
 
 from trip_ingest.model import RawRow, Trip
 
@@ -11,7 +11,7 @@ from trip_ingest.errors import MissingField ,NegativeDistance, BadTimestamp
 from datetime import datetime
 
 
-def read_drop(path: Path) -> Iterator[RawRow]:
+def read_drop(path: Path) -> Generator[RawRow, None, None]:
     """Yield one raw JSON object per line of a `.jsonl` drop.
 
     Task 2. A drop is a night's trips: it does not fit in memory, and on a bad night it does not fit
@@ -29,16 +29,16 @@ def read_drop(path: Path) -> Iterator[RawRow]:
 
 
 
-bad_rows = []
+#bad_rows = []
 def parse_row(raw: RawRow) -> Trip:
     """Turn one raw JSON object into a `Trip`, or raise. Task 3."""
 
     if raw.get("trip_id") is None or raw.get("station_id") is None or raw.get("distance_m") is None:
-        bad_rows.append(raw)
+        #bad_rows.append(raw)
         raise MissingField
     
     if raw["distance_m"] < 0:
-        bad_rows.append(raw)
+        #bad_rows.append(raw)
         raise NegativeDistance
     
     try:
@@ -52,7 +52,7 @@ def parse_row(raw: RawRow) -> Trip:
         ##more compact way to write the above code, pydantic will handle the validation and raise errors if any field is missing or has an invalid value.
     
     except (ValueError, KeyError):
-        bad_rows.append(raw)
+        #bad_rows.append(raw)
         raise BadTimestamp
 
     

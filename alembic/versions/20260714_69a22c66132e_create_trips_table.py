@@ -26,6 +26,7 @@ def upgrade() -> None:
     # op.execute("CREATE INDEX ix_trips_started_at ON trips (started_at)")
 
 
+
 def downgrade() -> None:
     # op.execute("DROP INDEX ix_trips_started_at")
     op.execute("DROP TABLE trips")

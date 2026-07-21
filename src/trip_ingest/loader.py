@@ -1,7 +1,6 @@
 """Task 5 — put the trips in the database."""
 from __future__ import annotations
 
-from ast import If
 from typing import Iterable
 
 import psycopg
@@ -14,8 +13,9 @@ def _insert(conn: psycopg.Connection, batch_list: list[Trip]) -> int:
     with conn.cursor() as cur:
         cur.executemany(
             "INSERT INTO trips (trip_id, station_id, started_at, distance_m) VALUES (%s, %s, %s, %s) ON CONFLICT (trip_id) DO NOTHING",
-            [(t.trip_id, t.station_id, t.started_at, t.distance_m)  for t in batch_list]
+            [(str(t.trip_id), str(t.station_id), t.started_at.isoformat(), int(t.distance_m))  for t in batch_list]
         )
+        conn.commit()  # Commit the transaction to persist the changes
         return cur.rowcount
 
 
@@ -29,6 +29,7 @@ def load_trips(conn: psycopg.Connection, trips: Iterable[Trip], batch_size: int 
     trips it has; ask it, rather than reading it all back to check.
     """
     inserted, batch_list  = 0, []
+    #batch_list: list[Trip] = []  # recommended: to identify the batch to know what it will be
     for trip in trips:
         batch_list.append(trip)
         if len(batch_list) == batch_size:
